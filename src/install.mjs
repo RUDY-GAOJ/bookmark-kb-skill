@@ -1,7 +1,15 @@
 import { copyFile, mkdir, readFile, access } from 'node:fs/promises';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { PLATFORMS, getPlatform, resolveSkillsDir } from './platforms.mjs';
+
+export function resolveBaseDir(scope, cwd = process.cwd(), env = process.env) {
+  if (scope === 'global') {
+    return env.USERPROFILE || env.HOME;
+  }
+
+  return cwd;
+}
 
 export async function installSkill({
   baseDir,
@@ -73,7 +81,7 @@ async function main(argv = process.argv.slice(2)) {
   }
 
   const result = await installSkill({
-    baseDir: process.cwd(),
+    baseDir: resolveBaseDir(options.scope),
     assetRoot: path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'assets'),
     ...options,
   });
@@ -81,4 +89,6 @@ async function main(argv = process.argv.slice(2)) {
   console.log(JSON.stringify(result));
 }
 
-void main();
+if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
+  void main();
+}

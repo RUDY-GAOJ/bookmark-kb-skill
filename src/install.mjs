@@ -1,6 +1,6 @@
 import { copyFile, mkdir, readFile, access } from 'node:fs/promises';
 import path from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 import { PLATFORMS, getPlatform, resolveSkillsDir } from './platforms.mjs';
 
 export function resolveBaseDir(scope, cwd = process.cwd(), env = process.env) {
@@ -53,7 +53,7 @@ export async function installSkill({
   return results;
 }
 
-async function main(argv = process.argv.slice(2)) {
+export async function main(argv = process.argv.slice(2)) {
   if (argv.length === 0) {
     return;
   }
@@ -87,8 +87,4 @@ async function main(argv = process.argv.slice(2)) {
   });
 
   console.log(JSON.stringify(result));
-}
-
-if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
-  void main();
 }

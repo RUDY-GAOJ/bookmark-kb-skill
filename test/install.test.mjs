@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { mkdtemp, mkdir, readFile, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
@@ -110,5 +111,22 @@ describe('installer', () => {
     } finally {
       process.argv = originalArgv;
     }
+  });
+
+  it('runs through the bin entrypoint', async () => {
+    const temp = await mkdtemp(path.join(os.tmpdir(), 'bookmark-kb-bin-'));
+    const bin = path.resolve('bin/bookmark-kb-install.js');
+
+    const result = spawnSync(process.execPath, [bin, '--platforms=codex', '--scope=project'], {
+      cwd: temp,
+      encoding: 'utf8',
+    });
+
+    assert.equal(result.status, 0, result.stderr);
+    const payload = JSON.parse(result.stdout);
+    assert.deepEqual(payload, [{ platform: 'codex', copied: 3, skipped: 0 }]);
+
+    const installed = path.join(temp, '.codex', 'skills', 'bookmark-kb-skill', 'SKILL.md');
+    assert.equal(typeof await readFile(installed, 'utf8'), 'string');
   });
 });

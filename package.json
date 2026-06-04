@@ -1,0 +1,14 @@
+{
+  "name": "@local/bookmark-kb-skill",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "bookmark-kb-install": "./bin/bookmark-kb-install.js"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs && python -m unittest discover -s test/python -p \"*_test.py\""
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

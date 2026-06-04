@@ -1,0 +1,8 @@
+{
+  "version": "0.1.0",
+  "skills": [
+    "bookmark-kb-skill/SKILL.md",
+    "bookmark-kb-skill/scripts/bookmark_kb.py",
+    "bookmark-kb-skill/references/cli.md"
+  ]
+}

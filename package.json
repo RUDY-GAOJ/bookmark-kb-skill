@@ -1,6 +1,7 @@
 {
   "name": "@local/bookmark-kb-skill",
   "version": "0.1.0",
+  "description": "Platform-neutral bookmark knowledge base skill installer",
   "type": "module",
   "bin": {
     "bookmark-kb-install": "./bin/bookmark-kb-install.js"

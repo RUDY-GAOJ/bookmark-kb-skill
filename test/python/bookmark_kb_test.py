@@ -1,5 +1,6 @@
 import json
 import os
+import importlib.util
 import subprocess
 import sys
 import tempfile
@@ -35,6 +36,7 @@ class BookmarkKbRefreshTest(unittest.TestCase):
 
             payload = json.loads(result.stdout)
             self.assertEqual(payload["added"], 2)
+            self.assertEqual(payload["store"], tmpdir)
 
             bookmarks_jsonl = Path(tmpdir) / "bookmarks.jsonl"
             lines = bookmarks_jsonl.read_text(encoding="utf-8").splitlines()
@@ -103,6 +105,7 @@ class BookmarkKbRefreshTest(unittest.TestCase):
             self.assertEqual(second_payload["added"], 0)
             self.assertEqual(second_payload["updated"], 0)
             self.assertEqual(second_payload["removed"], 0)
+            self.assertEqual(second_payload["store"], tmpdir)
 
     def test_search_returns_compact_result_with_reason(self):
         repo_root = Path(__file__).resolve().parents[2]
@@ -149,6 +152,44 @@ class BookmarkKbRefreshTest(unittest.TestCase):
             first = payload["results"][0]
             self.assertEqual(first["title"], "OpenAI Docs")
             self.assertIn("title", first["match_reasons"])
+
+    def test_search_returns_empty_results_without_cache(self):
+        repo_root = Path(__file__).resolve().parents[2]
+        script = repo_root / "assets" / "skills" / "bookmark-kb-skill" / "scripts" / "bookmark_kb.py"
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            env = os.environ.copy()
+            env["BOOKMARK_KB_HOME"] = tmpdir
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(script),
+                    "search",
+                    "anything",
+                    "--json",
+                ],
+                cwd=repo_root,
+                env=env,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["results"], [])
+
+    def test_tokenize_returns_set_semantics(self):
+        repo_root = Path(__file__).resolve().parents[2]
+        script = repo_root / "assets" / "skills" / "bookmark-kb-skill" / "scripts" / "bookmark_kb.py"
+        spec = importlib.util.spec_from_file_location("bookmark_kb", script)
+        module = importlib.util.module_from_spec(spec)
+        assert spec and spec.loader
+        spec.loader.exec_module(module)
+
+        tokens = module.tokenize("OpenAI Docs / Search")
+        self.assertIsInstance(tokens, set)
+        self.assertEqual(tokens, {"openai", "docs", "search"})
 
 
 if __name__ == "__main__":

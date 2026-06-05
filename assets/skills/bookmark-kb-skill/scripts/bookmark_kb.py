@@ -39,6 +39,9 @@ def read_bookmarks(path):
 
 
 def read_jsonl(path):
+    path = Path(path)
+    if not path.exists():
+        return []
     rows = []
     with open(path, "r", encoding="utf-8") as handle:
         for line in handle:
@@ -50,8 +53,8 @@ def read_jsonl(path):
 
 def tokenize(text):
     if not text:
-        return []
-    return [part for part in re.split(r"[\s/\-]+", str(text).lower()) if part]
+        return set()
+    return {part for part in re.split(r"[\s/\-]+", str(text).lower()) if part}
 
 
 def walk_bookmarks(node, folder_path=None):
@@ -103,7 +106,7 @@ def refresh(args):
             "added": 0,
             "updated": 0,
             "removed": 0,
-            "store": state,
+            "store": str(home),
         }
         if args.json:
             print(json.dumps(result, ensure_ascii=False))
@@ -136,7 +139,7 @@ def refresh(args):
         "added": len(rows),
         "updated": 0,
         "removed": 0,
-        "store": state,
+        "store": str(home),
     }
     if args.json:
         print(json.dumps(result, ensure_ascii=False))

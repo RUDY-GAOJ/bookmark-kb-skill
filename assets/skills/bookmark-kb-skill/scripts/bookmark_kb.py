@@ -185,8 +185,20 @@ def refresh(args):
     raw_hash = fingerprint(raw)
     state = load_state(home)
     if state and state.get("bookmark_file_sha256") == raw_hash:
+        rows_path = home / "bookmarks.jsonl"
+        rows = read_jsonl(rows_path)
+        reclassified = False
+        for row in rows:
+            if "category" not in row or "tags" not in row:
+                category, tags = classify(row)
+                row["category"] = category
+                row["tags"] = tags
+                reclassified = True
+        if reclassified:
+            write_jsonl(rows_path, rows)
         result = {
             "unchanged": True,
+            "reclassified": reclassified,
             "added": 0,
             "updated": 0,
             "removed": 0,

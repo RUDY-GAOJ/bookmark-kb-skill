@@ -107,6 +107,80 @@ class BookmarkKbRefreshTest(unittest.TestCase):
             self.assertEqual(second_payload["removed"], 0)
             self.assertEqual(second_payload["store"], tmpdir)
 
+    def test_refresh_backfills_missing_category_and_tags_on_unchanged_bookmark_file(self):
+        repo_root = Path(__file__).resolve().parents[2]
+        script = repo_root / "assets" / "skills" / "bookmark-kb-skill" / "scripts" / "bookmark_kb.py"
+        bookmarks_file = repo_root / "test" / "fixtures" / "Bookmarks"
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            env = os.environ.copy()
+            env["BOOKMARK_KB_HOME"] = tmpdir
+
+            first = subprocess.run(
+                [
+                    sys.executable,
+                    str(script),
+                    "refresh",
+                    "--bookmarks-file",
+                    str(bookmarks_file),
+                    "--json",
+                ],
+                cwd=repo_root,
+                env=env,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            first_payload = json.loads(first.stdout)
+            self.assertEqual(first_payload["added"], 2)
+
+            bookmarks_jsonl = Path(tmpdir) / "bookmarks.jsonl"
+            rows = []
+            for line in bookmarks_jsonl.read_text(encoding="utf-8").splitlines():
+                row = json.loads(line)
+                row.pop("category", None)
+                row.pop("tags", None)
+                rows.append(row)
+            bookmarks_jsonl.write_text(
+                "\n".join(json.dumps(row, ensure_ascii=False) for row in rows) + "\n",
+                encoding="utf-8",
+            )
+
+            second = subprocess.run(
+                [
+                    sys.executable,
+                    str(script),
+                    "refresh",
+                    "--bookmarks-file",
+                    str(bookmarks_file),
+                    "--json",
+                ],
+                cwd=repo_root,
+                env=env,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            second_payload = json.loads(second.stdout)
+
+            self.assertTrue(second_payload["unchanged"])
+            self.assertTrue(second_payload.get("reclassified"))
+            self.assertEqual(second_payload["added"], 0)
+            self.assertEqual(second_payload["updated"], 0)
+            self.assertEqual(second_payload["removed"], 0)
+            self.assertEqual(second_payload["store"], tmpdir)
+
+            refreshed_rows = [
+                json.loads(line)
+                for line in bookmarks_jsonl.read_text(encoding="utf-8").splitlines()
+                if line.strip()
+            ]
+            self.assertEqual(len(refreshed_rows), 2)
+            for row in refreshed_rows:
+                self.assertIn("category", row)
+                self.assertIn("tags", row)
+                self.assertIsInstance(row["tags"], list)
+
     def test_search_returns_compact_result_with_reason(self):
         repo_root = Path(__file__).resolve().parents[2]
         script = repo_root / "assets" / "skills" / "bookmark-kb-skill" / "scripts" / "bookmark_kb.py"

@@ -55,6 +55,101 @@ class BookmarkKbRefreshTest(unittest.TestCase):
             self.assertTrue(state["bookmark_file_sha256"])
             self.assertEqual(state["bookmarks_file"], str(bookmarks_file))
 
+    def test_refresh_skips_unchanged_bookmark_file(self):
+        repo_root = Path(__file__).resolve().parents[2]
+        script = repo_root / "assets" / "skills" / "bookmark-kb-skill" / "scripts" / "bookmark_kb.py"
+        bookmarks_file = repo_root / "test" / "fixtures" / "Bookmarks"
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            env = os.environ.copy()
+            env["BOOKMARK_KB_HOME"] = tmpdir
+
+            first = subprocess.run(
+                [
+                    sys.executable,
+                    str(script),
+                    "refresh",
+                    "--bookmarks-file",
+                    str(bookmarks_file),
+                    "--json",
+                ],
+                cwd=repo_root,
+                env=env,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            first_payload = json.loads(first.stdout)
+            self.assertEqual(first_payload["added"], 2)
+
+            second = subprocess.run(
+                [
+                    sys.executable,
+                    str(script),
+                    "refresh",
+                    "--bookmarks-file",
+                    str(bookmarks_file),
+                    "--json",
+                ],
+                cwd=repo_root,
+                env=env,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            second_payload = json.loads(second.stdout)
+
+            self.assertTrue(second_payload["unchanged"])
+            self.assertEqual(second_payload["added"], 0)
+            self.assertEqual(second_payload["updated"], 0)
+            self.assertEqual(second_payload["removed"], 0)
+
+    def test_search_returns_compact_result_with_reason(self):
+        repo_root = Path(__file__).resolve().parents[2]
+        script = repo_root / "assets" / "skills" / "bookmark-kb-skill" / "scripts" / "bookmark_kb.py"
+        bookmarks_file = repo_root / "test" / "fixtures" / "Bookmarks"
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            env = os.environ.copy()
+            env["BOOKMARK_KB_HOME"] = tmpdir
+
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(script),
+                    "refresh",
+                    "--bookmarks-file",
+                    str(bookmarks_file),
+                    "--json",
+                ],
+                cwd=repo_root,
+                env=env,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(script),
+                    "search",
+                    "openai docs",
+                    "--json",
+                ],
+                cwd=repo_root,
+                env=env,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(len(payload["results"]), 1)
+            first = payload["results"][0]
+            self.assertEqual(first["title"], "OpenAI Docs")
+            self.assertIn("title", first["match_reasons"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -130,3 +130,20 @@ describe('installer', () => {
     assert.equal(typeof await readFile(installed, 'utf8'), 'string');
   });
 });
+
+describe('skill documentation contract', () => {
+  it('keeps the skill instructions platform neutral and environment aware', async () => {
+    const skill = await readFile('assets/skills/bookmark-kb-skill/SKILL.md', 'utf8');
+    const frontmatter = skill.match(/^---\r?\n(?<body>[\s\S]*?)\r?\n---/);
+
+    assert.ok(frontmatter, 'SKILL.md must include YAML frontmatter');
+    const name = frontmatter.groups.body
+      .split(/\r?\n/)
+      .find((line) => line.startsWith('name:'));
+
+    assert.equal(name, 'name: bookmark-kb-skill');
+    assert.match(skill, /Use when/);
+    assert.doesNotMatch(skill, /\.codex\/bookmark-kb/);
+    assert.match(skill, /BOOKMARK_KB_HOME/);
+  });
+});

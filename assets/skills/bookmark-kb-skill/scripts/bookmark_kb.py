@@ -19,6 +19,19 @@ def fingerprint(data):
     return hashlib.sha256(data).hexdigest()
 
 
+def bookmark_id(row):
+    payload = json.dumps(
+        {
+            "folder_path": row["folder_path"],
+            "title": row["title"],
+            "url": row["url"],
+        },
+        ensure_ascii=False,
+        sort_keys=True,
+    ).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
+
+
 def read_bookmarks(path):
     with open(path, "r", encoding="utf-8") as handle:
         return json.load(handle)
@@ -36,11 +49,14 @@ def walk_bookmarks(node, folder_path=None):
         return
 
     if node_type == "url":
-        yield {
+        row = {
             "title": name,
             "url": node.get("url"),
             "folder_path": folder_path,
         }
+        row["id"] = bookmark_id(row)
+        row["status"] = "known"
+        yield row
 
 
 def write_jsonl(path, rows):
@@ -67,9 +83,10 @@ def refresh(args):
     write_jsonl(home / "bookmarks.jsonl", rows)
 
     state = {
-        "fingerprint": fingerprint(raw),
-        "source": str(Path(args.bookmarks_file)),
-        "count": len(rows),
+        "schema_version": 1,
+        "bookmarks_file": str(Path(args.bookmarks_file)),
+        "bookmark_count": len(rows),
+        "bookmark_file_sha256": fingerprint(raw),
     }
     (home / "state.json").write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
 

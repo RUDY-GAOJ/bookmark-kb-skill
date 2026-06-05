@@ -20,6 +20,14 @@
           "id": "3",
           "name": "AI",
           "type": "folder"
+        },
+        {
+          "date_added": "13300000000000000",
+          "guid": "example-root-guid",
+          "id": "5",
+          "name": "Example",
+          "type": "url",
+          "url": "https://example.com"
         }
       ],
       "date_added": "13300000000000000",
@@ -30,16 +38,7 @@
       "type": "folder"
     },
     "other": {
-      "children": [
-        {
-          "date_added": "13300000000000000",
-          "guid": "example-root-guid",
-          "id": "5",
-          "name": "Example",
-          "type": "url",
-          "url": "https://example.com"
-        }
-      ],
+      "children": [],
       "date_added": "13300000000000000",
       "date_modified": "13300000000000000",
       "guid": "other-guid",

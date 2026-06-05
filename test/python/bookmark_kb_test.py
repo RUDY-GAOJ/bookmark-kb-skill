@@ -41,11 +41,19 @@ class BookmarkKbRefreshTest(unittest.TestCase):
             self.assertEqual(len(lines), 2)
 
             first = json.loads(lines[0])
+            second = json.loads(lines[1])
             self.assertEqual(first["title"], "OpenAI Docs")
             self.assertEqual(first["folder_path"], ["Bookmarks Bar", "AI"])
+            self.assertTrue(first["id"])
+            self.assertEqual(first["status"], "known")
+            self.assertEqual(second["title"], "Example")
+            self.assertEqual(second["folder_path"], ["Bookmarks Bar"])
 
             state = json.loads((Path(tmpdir) / "state.json").read_text(encoding="utf-8"))
-            self.assertTrue(state["fingerprint"])
+            self.assertEqual(state["schema_version"], 1)
+            self.assertEqual(state["bookmark_count"], 2)
+            self.assertTrue(state["bookmark_file_sha256"])
+            self.assertEqual(state["bookmarks_file"], str(bookmarks_file))
 
 
 if __name__ == "__main__":

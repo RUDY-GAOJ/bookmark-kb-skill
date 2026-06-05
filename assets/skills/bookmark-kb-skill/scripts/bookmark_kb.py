@@ -3,6 +3,7 @@ import hashlib
 import json
 import os
 import re
+from datetime import datetime, timezone
 from pathlib import Path
 import sys
 
@@ -12,6 +13,16 @@ def kb_home():
     if home:
         return Path(home)
     return Path.home() / ".bookmark-kb"
+
+
+def runs_dir():
+    path = kb_home() / "runs"
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
+def stamp():
+    return datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
 
 
 def fingerprint(data):
@@ -57,6 +68,22 @@ def tokenize(text):
     return {part for part in re.split(r"[\s/\-]+", str(text).lower()) if part}
 
 
+def classify(row):
+    text = " ".join(
+        str(part)
+        for part in (
+            row.get("title", ""),
+            row.get("url", ""),
+            "/".join(row.get("folder_path", [])),
+        )
+    ).lower()
+    if "openai" in text or " ai" in f" {text}" or text.startswith("ai"):
+        return "AI", ["ai"]
+    if "docs" in text or "documentation" in text:
+        return "Documentation", ["docs"]
+    return "Needs Review", []
+
+
 def walk_bookmarks(node, folder_path=None):
     folder_path = list(folder_path or [])
     node_type = node.get("type")
@@ -79,6 +106,10 @@ def walk_bookmarks(node, folder_path=None):
         yield row
 
 
+def normalized_url(url):
+    return str(url or "").lower().rstrip("/")
+
+
 def write_jsonl(path, rows):
     with open(path, "w", encoding="utf-8", newline="\n") as handle:
         for row in rows:
@@ -93,68 +124,15 @@ def load_state(home):
     return json.loads(state_path.read_text(encoding="utf-8"))
 
 
-def refresh(args):
-    home = kb_home()
-    home.mkdir(parents=True, exist_ok=True)
-
-    raw = Path(args.bookmarks_file).read_bytes()
-    raw_hash = fingerprint(raw)
-    state = load_state(home)
-    if state and state.get("bookmark_file_sha256") == raw_hash:
-        result = {
-            "unchanged": True,
-            "added": 0,
-            "updated": 0,
-            "removed": 0,
-            "store": str(home),
-        }
-        if args.json:
-            print(json.dumps(result, ensure_ascii=False))
-        else:
-            print("## Refresh")
-            print("- Unchanged: true")
-        return result
-
-    bookmarks = read_bookmarks(args.bookmarks_file)
-
-    rows = []
-    roots = bookmarks.get("roots", {})
-    for root_key in ("bookmark_bar", "other", "synced"):
-        root = roots.get(root_key)
-        if root:
-            rows.extend(walk_bookmarks(root))
-
-    write_jsonl(home / "bookmarks.jsonl", rows)
-
-    state = {
-        "schema_version": 1,
-        "bookmarks_file": str(Path(args.bookmarks_file)),
-        "bookmark_count": len(rows),
-        "bookmark_file_sha256": raw_hash,
-    }
-    (home / "state.json").write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
-
-    result = {
-        "unchanged": False,
-        "added": len(rows),
-        "updated": 0,
-        "removed": 0,
-        "store": str(home),
-    }
-    if args.json:
-        print(json.dumps(result, ensure_ascii=False))
-    else:
-        print("## Refresh")
-        print(f"- Added: {len(rows)}")
-    return result
-
-
-def search(args):
-    home = kb_home()
-    query = " ".join(args.query) if isinstance(args.query, list) else str(args.query)
-    query_tokens = tokenize(query)
+def load_bookmark_rows(home=None):
+    home = home or kb_home()
     rows_path = home / "bookmarks.jsonl"
-    rows = read_jsonl(rows_path) if rows_path.exists() else []
+    return read_jsonl(rows_path) if rows_path.exists() else []
+
+
+def search_rows(query, limit=10):
+    query_tokens = tokenize(query)
+    rows = load_bookmark_rows()
 
     results = []
     for row in rows:
@@ -195,15 +173,156 @@ def search(args):
         )
 
     results.sort(key=lambda item: (-item["_score"], item["title"].lower(), item["url"]))
-    compact_results = [{k: v for k, v in item.items() if k != "_score"} for item in results[:10]]
-    payload = {"query": query, "results": compact_results}
+    compact_results = [{k: v for k, v in item.items() if k != "_score"} for item in results[:limit]]
+    return {"query": query, "results": compact_results}
+
+
+def refresh(args):
+    home = kb_home()
+    home.mkdir(parents=True, exist_ok=True)
+
+    raw = Path(args.bookmarks_file).read_bytes()
+    raw_hash = fingerprint(raw)
+    state = load_state(home)
+    if state and state.get("bookmark_file_sha256") == raw_hash:
+        result = {
+            "unchanged": True,
+            "added": 0,
+            "updated": 0,
+            "removed": 0,
+            "store": str(home),
+        }
+        if args.json:
+            print(json.dumps(result, ensure_ascii=False))
+        else:
+            print("## Refresh")
+            print("- Unchanged: true")
+        return result
+
+    bookmarks = read_bookmarks(args.bookmarks_file)
+
+    rows = []
+    roots = bookmarks.get("roots", {})
+    for root_key in ("bookmark_bar", "other", "synced"):
+        root = roots.get(root_key)
+        if root:
+            for row in walk_bookmarks(root):
+                category, tags = classify(row)
+                row["category"] = category
+                row["tags"] = tags
+                rows.append(row)
+
+    write_jsonl(home / "bookmarks.jsonl", rows)
+
+    state = {
+        "schema_version": 1,
+        "bookmarks_file": str(Path(args.bookmarks_file)),
+        "bookmark_count": len(rows),
+        "bookmark_file_sha256": raw_hash,
+    }
+    (home / "state.json").write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    result = {
+        "unchanged": False,
+        "added": len(rows),
+        "updated": 0,
+        "removed": 0,
+        "store": str(home),
+    }
+    if args.json:
+        print(json.dumps(result, ensure_ascii=False))
+    else:
+        print("## Refresh")
+        print(f"- Added: {len(rows)}")
+    return result
+
+
+def search(args):
+    query = " ".join(args.query) if isinstance(args.query, list) else str(args.query)
+    payload = search_rows(query, limit=10)
 
     if args.json:
         print(json.dumps(payload, ensure_ascii=False))
     else:
         print("## Search")
-        for item in compact_results:
+        for item in payload["results"]:
             print(f"- {item['title']} - {item['url']}")
+    return payload
+
+
+def context(args):
+    query = " ".join(args.query) if isinstance(args.query, list) else str(args.query)
+    payload = search_rows(query, limit=5)
+    items = payload["results"]
+    path = runs_dir() / f"context-{stamp()}.md"
+    lines = [f"# Context: {query}", ""]
+    for item in items:
+        lines.append(f"- {item['title']} | {item['url']} | Category: {item['category']}")
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    result = {"query": query, "path": str(path), "items": items}
+
+    if args.json:
+        print(json.dumps(result, ensure_ascii=False))
+    else:
+        print(f"## Context: {query}")
+        for item in items:
+            print(f"- {item['title']} - {item['url']} ({item['category']})")
+    return result
+
+
+def organize(args):
+    home = kb_home()
+    rows = load_bookmark_rows(home)
+    groups = {}
+    for row in rows:
+        key = normalized_url(row.get("url"))
+        groups.setdefault(key, []).append(row)
+
+    duplicate_groups = []
+    for url, items in groups.items():
+        if len(items) > 1 and url:
+            duplicate_groups.append(
+                {
+                    "normalized_url": url,
+                    "count": len(items),
+                    "items": [
+                        {
+                            "title": item.get("title", ""),
+                            "url": item.get("url", ""),
+                            "folder_path": item.get("folder_path", []),
+                            "category": item.get("category", "Unclassified"),
+                        }
+                        for item in items
+                    ],
+                }
+            )
+
+    path_base = runs_dir() / f"organize-{stamp()}"
+    markdown_path = path_base.with_suffix(".md")
+    json_path = path_base.with_suffix(".json")
+    markdown_lines = [f"# Organize Report", f"- Mode: {args.mode}", f"- Duplicate groups: {len(duplicate_groups)}", ""]
+    for group in duplicate_groups:
+        markdown_lines.append(f"## {group['normalized_url']}")
+        for item in group["items"]:
+            markdown_lines.append(f"- {item['title']} | {item['url']} | Category: {item['category']}")
+        markdown_lines.append("")
+    markdown_path.write_text("\n".join(markdown_lines).rstrip() + "\n", encoding="utf-8")
+
+    payload = {
+        "executed": False,
+        "mode": args.mode,
+        "duplicate_groups": duplicate_groups,
+        "markdown_path": str(markdown_path),
+        "json_path": str(json_path),
+    }
+    json_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    if args.json:
+        print(json.dumps(payload, ensure_ascii=False))
+    else:
+        print("## Organize")
+        print(f"- Executed: false")
+        print(f"- Duplicate groups: {len(duplicate_groups)}")
     return payload
 
 
@@ -220,6 +339,16 @@ def build_parser():
     search_parser.add_argument("query", nargs="+")
     search_parser.add_argument("--json", action="store_true")
     search_parser.set_defaults(func=search)
+
+    context_parser = subparsers.add_parser("context")
+    context_parser.add_argument("query", nargs="+")
+    context_parser.add_argument("--json", action="store_true")
+    context_parser.set_defaults(func=context)
+
+    organize_parser = subparsers.add_parser("organize")
+    organize_parser.add_argument("--mode", default="all")
+    organize_parser.add_argument("--json", action="store_true")
+    organize_parser.set_defaults(func=organize)
 
     return parser
 

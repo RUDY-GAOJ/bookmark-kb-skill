@@ -179,6 +179,105 @@ class BookmarkKbRefreshTest(unittest.TestCase):
             payload = json.loads(result.stdout)
             self.assertEqual(payload["results"], [])
 
+    def test_context_bundle_writes_markdown_with_sources(self):
+        repo_root = Path(__file__).resolve().parents[2]
+        script = repo_root / "assets" / "skills" / "bookmark-kb-skill" / "scripts" / "bookmark_kb.py"
+        bookmarks_file = repo_root / "test" / "fixtures" / "Bookmarks"
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            env = os.environ.copy()
+            env["BOOKMARK_KB_HOME"] = tmpdir
+
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(script),
+                    "refresh",
+                    "--bookmarks-file",
+                    str(bookmarks_file),
+                    "--json",
+                ],
+                cwd=repo_root,
+                env=env,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(script),
+                    "context",
+                    "openai",
+                    "--json",
+                ],
+                cwd=repo_root,
+                env=env,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+
+            payload = json.loads(result.stdout)
+            self.assertTrue(payload["path"])
+            self.assertTrue(Path(payload["path"]).exists())
+            markdown = Path(payload["path"]).read_text(encoding="utf-8")
+            self.assertIn("https://platform.openai.com/docs", markdown)
+
+    def test_organize_exports_duplicate_report_without_execution(self):
+        repo_root = Path(__file__).resolve().parents[2]
+        script = repo_root / "assets" / "skills" / "bookmark-kb-skill" / "scripts" / "bookmark_kb.py"
+        bookmarks_file = repo_root / "test" / "fixtures" / "Bookmarks"
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            env = os.environ.copy()
+            env["BOOKMARK_KB_HOME"] = tmpdir
+
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(script),
+                    "refresh",
+                    "--bookmarks-file",
+                    str(bookmarks_file),
+                    "--json",
+                ],
+                cwd=repo_root,
+                env=env,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+
+            bookmarks_jsonl = Path(tmpdir) / "bookmarks.jsonl"
+            original_lines = bookmarks_jsonl.read_text(encoding="utf-8").splitlines()
+            bookmarks_jsonl.write_text(
+                "\n".join(original_lines + [original_lines[0]]) + "\n",
+                encoding="utf-8",
+            )
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(script),
+                    "organize",
+                    "--mode",
+                    "all",
+                    "--json",
+                ],
+                cwd=repo_root,
+                env=env,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+
+            payload = json.loads(result.stdout)
+            self.assertFalse(payload["executed"])
+            self.assertTrue(payload["markdown_path"])
+            self.assertTrue(Path(payload["markdown_path"]).exists())
+
     def test_tokenize_returns_set_semantics(self):
         repo_root = Path(__file__).resolve().parents[2]
         script = repo_root / "assets" / "skills" / "bookmark-kb-skill" / "scripts" / "bookmark_kb.py"

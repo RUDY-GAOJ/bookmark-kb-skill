@@ -1,9 +1,20 @@
 {
-  "name": "@local/bookmark-kb-skill",
+  "name": "bookmark-kb-skill",
   "version": "0.1.0",
-  "description": "Platform-neutral bookmark knowledge base skill installer",
+  "description": "Install and run a platform-neutral bookmark knowledge base skill",
   "type": "module",
+  "files": [
+    "assets/manifest.json",
+    "assets/skills/bookmark-kb-skill/SKILL.md",
+    "assets/skills/bookmark-kb-skill/references",
+    "assets/skills/bookmark-kb-skill/scripts/bookmark_kb.py",
+    "bin",
+    "src",
+    "README.md"
+  ],
   "bin": {
+    "bookmark-kb": "./bin/bookmark-kb.js",
+    "bookmark-kb-skill": "./bin/bookmark-kb.js",
     "bookmark-kb-install": "./bin/bookmark-kb-install.js"
   },
   "scripts": {

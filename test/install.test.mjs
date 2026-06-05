@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtemp, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { describe, it } from 'node:test';
@@ -145,6 +145,79 @@ describe('installer', () => {
 
     const installed = path.join(temp, '.codex', 'skills', 'bookmark-kb-skill', 'SKILL.md');
     assert.equal(typeof await readFile(installed, 'utf8'), 'string');
+  });
+
+  it('runs install through the npm-style CLI entrypoint', async () => {
+    const temp = await mkdtemp(path.join(os.tmpdir(), 'bookmark-kb-cli-install-'));
+    const bin = path.resolve('bin/bookmark-kb.js');
+
+    try {
+      const result = spawnSync(
+        process.execPath,
+        [bin, 'install', '--platforms=codex,claude', '--scope=project', '--overwrite'],
+        {
+          cwd: temp,
+          encoding: 'utf8',
+        }
+      );
+
+      assert.equal(result.status, 0, result.stderr);
+      const payload = JSON.parse(result.stdout);
+      assert.deepEqual(payload, [
+        { platform: 'codex', copied: 3, skipped: 0 },
+        { platform: 'claude', copied: 3, skipped: 0 },
+      ]);
+
+      const codexSkill = path.join(temp, '.codex', 'skills', 'bookmark-kb-skill', 'SKILL.md');
+      const claudeSkill = path.join(temp, '.claude', 'skills', 'bookmark-kb-skill', 'SKILL.md');
+      assert.equal(typeof await readFile(codexSkill, 'utf8'), 'string');
+      assert.equal(typeof await readFile(claudeSkill, 'utf8'), 'string');
+    } finally {
+      await rm(temp, { recursive: true, force: true });
+    }
+  });
+
+  it('runs bookmark refresh through the npm-style CLI entrypoint', async () => {
+    const cache = await mkdtemp(path.join(os.tmpdir(), 'bookmark-kb-cli-cache-'));
+    const bin = path.resolve('bin/bookmark-kb.js');
+    const fixture = path.resolve('test/fixtures/Bookmarks');
+
+    try {
+      const result = spawnSync(
+        process.execPath,
+        [bin, 'refresh', '--bookmarks-file', fixture, '--json'],
+        {
+          env: { ...process.env, BOOKMARK_KB_HOME: cache },
+          encoding: 'utf8',
+        }
+      );
+
+      assert.equal(result.status, 0, result.stderr);
+      const payload = JSON.parse(result.stdout);
+      assert.equal(payload.added, 2);
+      assert.equal(payload.store, cache);
+    } finally {
+      await rm(cache, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('npm package metadata', () => {
+  it('exposes npx-friendly package and bin names', async () => {
+    const pkg = JSON.parse(await readFile('package.json', 'utf8'));
+
+    assert.equal(pkg.name, 'bookmark-kb-skill');
+    assert.equal(pkg.bin['bookmark-kb-skill'], './bin/bookmark-kb.js');
+    assert.equal(pkg.bin['bookmark-kb'], './bin/bookmark-kb.js');
+    assert.deepEqual(pkg.files, [
+      'assets/manifest.json',
+      'assets/skills/bookmark-kb-skill/SKILL.md',
+      'assets/skills/bookmark-kb-skill/references',
+      'assets/skills/bookmark-kb-skill/scripts/bookmark_kb.py',
+      'bin',
+      'src',
+      'README.md',
+    ]);
   });
 });
 

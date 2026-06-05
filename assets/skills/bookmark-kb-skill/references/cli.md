@@ -1,9 +1,10 @@
 # Bookmark KB CLI
 
-Run the bundled script from the skill directory:
+Install or run with npm/npx:
 
 ```sh
-python scripts/bookmark_kb.py <command> [options]
+npx bookmark-kb-skill install --platforms=codex --scope=project --overwrite
+npx bookmark-kb-skill refresh --json
 ```
 
 Runtime data defaults to `~/.bookmark-kb`. Set `BOOKMARK_KB_HOME` to use another cache directory.
@@ -23,31 +24,33 @@ Chrome's default profile usually stores bookmarks at:
 Refresh the local cache first:
 
 ```sh
-python scripts/bookmark_kb.py refresh
-python scripts/bookmark_kb.py refresh --json
-python scripts/bookmark_kb.py refresh --bookmarks-file "<path-to-Bookmarks>"
-python scripts/bookmark_kb.py refresh --bookmarks-file "<path-to-Bookmarks>" --json
+bookmark-kb refresh
+bookmark-kb refresh --json
+bookmark-kb refresh --bookmarks-file "<path-to-Bookmarks>"
+bookmark-kb refresh --bookmarks-file "<path-to-Bookmarks>" --json
 ```
 
 Search cached bookmarks:
 
 ```sh
-python scripts/bookmark_kb.py search openai docs
-python scripts/bookmark_kb.py search openai docs --json
+bookmark-kb search openai docs
+bookmark-kb search openai docs --json
 ```
 
 Write a compact context bundle under the run directory:
 
 ```sh
-python scripts/bookmark_kb.py context openai docs
-python scripts/bookmark_kb.py context openai docs --json
+bookmark-kb context openai docs
+bookmark-kb context openai docs --json
 ```
 
 Export organization suggestions and duplicate reports without executing changes:
 
 ```sh
-python scripts/bookmark_kb.py organize --mode all
-python scripts/bookmark_kb.py organize --mode all --json
+bookmark-kb organize --mode all
+bookmark-kb organize --mode all --json
 ```
 
 `organize` reports `executed: false`; review the exported Markdown or JSON before making any browser changes manually.
+
+The `bookmark-kb` command is a Node wrapper. It may use the bundled Python implementation internally, but users and agents should call the npm command.

@@ -9,10 +9,10 @@ Use when a task can benefit from the user's browser bookmarks as a local knowled
 
 ## Workflow
 
-1. Refresh first. Run `refresh` against the current Chrome bookmarks file before searching unless the user explicitly wants to use the existing cache.
-2. Search the local cache for quick matches by title, URL, and folder path.
-3. Use `context` when the user needs a compact source bundle written to the run directory.
-4. Use `organize` only to export suggestions and duplicate reports. It does not execute browser changes, move bookmarks, or delete bookmarks.
+1. Refresh first with `bookmark-kb refresh` against the current Chrome bookmarks file before searching unless the user explicitly wants to use the existing cache.
+2. Search the local cache with `bookmark-kb search "<query>"` for quick matches by title, URL, and folder path.
+3. Use `bookmark-kb context "<query>"` when the user needs a compact source bundle written to the run directory.
+4. Use `bookmark-kb organize --mode all` only to export suggestions and duplicate reports. It does not execute browser changes, move bookmarks, or delete bookmarks.
 
 ## Data Location
 
@@ -22,4 +22,4 @@ The cache is local. Refresh writes bookmark rows and state to the runtime store;
 
 ## CLI Reference
 
-For exact commands and options, see `references/cli.md`. Prefer that reference when choosing flags such as `--bookmarks-file`, `--mode`, or `--json`.
+For exact npm/npx commands and options, see `references/cli.md`. Prefer that reference when choosing flags such as `--bookmarks-file`, `--mode`, or `--json`.

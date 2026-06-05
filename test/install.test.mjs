@@ -129,6 +129,23 @@ describe('installer', () => {
     const installed = path.join(temp, '.codex', 'skills', 'bookmark-kb-skill', 'SKILL.md');
     assert.equal(typeof await readFile(installed, 'utf8'), 'string');
   });
+
+  it('runs through the source module when invoked directly', async () => {
+    const temp = await mkdtemp(path.join(os.tmpdir(), 'bookmark-kb-src-'));
+    const installer = path.resolve('src/install.mjs');
+
+    const result = spawnSync(process.execPath, [installer, '--platforms=codex', '--scope=project'], {
+      cwd: temp,
+      encoding: 'utf8',
+    });
+
+    assert.equal(result.status, 0, result.stderr);
+    const payload = JSON.parse(result.stdout);
+    assert.deepEqual(payload, [{ platform: 'codex', copied: 3, skipped: 0 }]);
+
+    const installed = path.join(temp, '.codex', 'skills', 'bookmark-kb-skill', 'SKILL.md');
+    assert.equal(typeof await readFile(installed, 'utf8'), 'string');
+  });
 });
 
 describe('skill documentation contract', () => {

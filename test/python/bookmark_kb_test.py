@@ -57,6 +57,49 @@ class BookmarkKbRefreshTest(unittest.TestCase):
             self.assertTrue(state["bookmark_file_sha256"])
             self.assertEqual(state["bookmarks_file"], str(bookmarks_file))
 
+    def test_refresh_uses_default_chrome_bookmarks_file(self):
+        repo_root = Path(__file__).resolve().parents[2]
+        script = repo_root / "assets" / "skills" / "bookmark-kb-skill" / "scripts" / "bookmark_kb.py"
+        bookmarks_file = repo_root / "test" / "fixtures" / "Bookmarks"
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            temp_home = Path(tmpdir) / "home"
+            temp_cache = Path(tmpdir) / "cache"
+            if sys.platform.startswith("win"):
+                default_file = temp_home / "Google" / "Chrome" / "User Data" / "Default" / "Bookmarks"
+                env_var = "LOCALAPPDATA"
+            elif sys.platform == "darwin":
+                default_file = temp_home / "Library" / "Application Support" / "Google" / "Chrome" / "Default" / "Bookmarks"
+                env_var = "HOME"
+            else:
+                default_file = temp_home / ".config" / "google-chrome" / "Default" / "Bookmarks"
+                env_var = "HOME"
+            default_file.parent.mkdir(parents=True, exist_ok=True)
+            default_file.write_text(bookmarks_file.read_text(encoding="utf-8"), encoding="utf-8")
+
+            env = os.environ.copy()
+            env["BOOKMARK_KB_HOME"] = str(temp_cache)
+            env[env_var] = str(temp_home)
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(script),
+                    "refresh",
+                    "--json",
+                ],
+                cwd=repo_root,
+                env=env,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["added"], 2)
+            state = json.loads((temp_cache / "state.json").read_text(encoding="utf-8"))
+            self.assertEqual(state["bookmarks_file"], str(default_file))
+
     def test_refresh_skips_unchanged_bookmark_file(self):
         repo_root = Path(__file__).resolve().parents[2]
         script = repo_root / "assets" / "skills" / "bookmark-kb-skill" / "scripts" / "bookmark_kb.py"

@@ -15,6 +15,19 @@ def kb_home():
     return Path.home() / ".bookmark-kb"
 
 
+def default_bookmarks_file():
+    if sys.platform.startswith("win"):
+        base = os.environ.get("LOCALAPPDATA")
+        if base:
+            return Path(base) / "Google" / "Chrome" / "User Data" / "Default" / "Bookmarks"
+        return Path.home() / "AppData" / "Local" / "Google" / "Chrome" / "User Data" / "Default" / "Bookmarks"
+
+    if sys.platform == "darwin":
+        return Path.home() / "Library" / "Application Support" / "Google" / "Chrome" / "Default" / "Bookmarks"
+
+    return Path.home() / ".config" / "google-chrome" / "Default" / "Bookmarks"
+
+
 def runs_dir():
     path = kb_home() / "runs"
     path.mkdir(parents=True, exist_ok=True)
@@ -181,7 +194,8 @@ def refresh(args):
     home = kb_home()
     home.mkdir(parents=True, exist_ok=True)
 
-    raw = Path(args.bookmarks_file).read_bytes()
+    bookmarks_file = Path(args.bookmarks_file) if args.bookmarks_file else default_bookmarks_file()
+    raw = bookmarks_file.read_bytes()
     raw_hash = fingerprint(raw)
     state = load_state(home)
     if state and state.get("bookmark_file_sha256") == raw_hash:
@@ -211,7 +225,7 @@ def refresh(args):
             print("- Unchanged: true")
         return result
 
-    bookmarks = read_bookmarks(args.bookmarks_file)
+    bookmarks = read_bookmarks(bookmarks_file)
 
     rows = []
     roots = bookmarks.get("roots", {})
@@ -228,7 +242,7 @@ def refresh(args):
 
     state = {
         "schema_version": 1,
-        "bookmarks_file": str(Path(args.bookmarks_file)),
+        "bookmarks_file": str(bookmarks_file),
         "bookmark_count": len(rows),
         "bookmark_file_sha256": raw_hash,
     }
@@ -343,7 +357,7 @@ def build_parser():
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     refresh_parser = subparsers.add_parser("refresh")
-    refresh_parser.add_argument("--bookmarks-file", required=True)
+    refresh_parser.add_argument("--bookmarks-file")
     refresh_parser.add_argument("--json", action="store_true")
     refresh_parser.set_defaults(func=refresh)
 

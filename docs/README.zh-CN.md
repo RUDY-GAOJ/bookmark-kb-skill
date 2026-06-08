@@ -33,28 +33,22 @@
 
 ## 给 Agent
 
-复制下面这一段给你的 AI 编程 Agent，让它替你安装：
+复制下面这一段给你的 AI 编程 Agent。Agent 应该知道自己运行在哪个平台；它只需要从支持的平台 id 里选择匹配项，然后按命令格式安装。
 
 ```text
-请把 bookmark-kb-skill 安装到当前项目的 Codex skill 目录。请执行：
-npm exec --yes --package github:RUDY-GAOJ/bookmark-kb-skill -- bookmark-kb-skill install --platforms=codex --scope=project --overwrite
-安装后，当我要求搜索、引用或整理 Chrome 收藏夹时，请使用 bookmark-kb-skill。
+请把 bookmark-kb-skill 安装到当前项目。
+
+1. 识别你当前所在的 AI Agent 平台。
+2. 从这些平台 id 里选择匹配项：codex, claude, gemini, cursor, opencode, openclaw, hermes。
+3. 执行：
+   npm exec --yes --package github:RUDY-GAOJ/bookmark-kb-skill -- bookmark-kb-skill install --platforms=<platform-id> --scope=project --overwrite
+4. 安装后，当我要求搜索、引用或整理 Chrome 收藏夹时，请使用 bookmark-kb-skill。
 ```
 
-如果你同时使用 Codex、Claude、OpenClaw 和 Hermes，复制这一段：
+如果我明确要求你同时安装到多个平台，请把 platform id 用英文逗号连接，例如：
 
 ```text
-请把 bookmark-kb-skill 安装到当前项目的 Codex、Claude、OpenClaw 和 Hermes skill 目录。请执行：
 npm exec --yes --package github:RUDY-GAOJ/bookmark-kb-skill -- bookmark-kb-skill install --platforms=codex,claude,openclaw,hermes --scope=project --overwrite
-安装后，当我要求搜索、引用或整理 Chrome 收藏夹时，请使用 bookmark-kb-skill。
-```
-
-如果你同时使用 Codex 和 Claude，复制这一段：
-
-```text
-请把 bookmark-kb-skill 安装到当前项目的 Codex 和 Claude skill 目录。请执行：
-npm exec --yes --package github:RUDY-GAOJ/bookmark-kb-skill -- bookmark-kb-skill install --platforms=codex,claude --scope=project --overwrite
-安装后，当我要求搜索、引用或整理 Chrome 收藏夹时，请使用 bookmark-kb-skill。
 ```
 
 安装后，你可以这样对 Agent 说：

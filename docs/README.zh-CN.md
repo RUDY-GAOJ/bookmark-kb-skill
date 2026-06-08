@@ -20,7 +20,7 @@
 
 你是否还在为乱糟糟的收藏夹而头疼不已？常常想不起自己收藏的内容放到了哪里？想要整理庞大的收藏夹又无从下手？本 Skill 可以直接将你的收藏夹变成即插即用的 AI 知识库。
 
-`bookmark-kb-skill` 可以把同一份平台中立 Skill 安装到常见 AI 工具的 `skills/` 目录，让 Agent 像使用本地知识库一样使用你的 Chrome 收藏夹：找回忘记放在哪里的资料、把某一主题的收藏内容整理成任务上下文、导出可审阅的整理报告、发现重复链接和混乱文件夹。
+`bookmark-kb-skill` 的核心目标不是做一个 Skill 管理平台，而是让 Agent 像使用本地知识库一样使用你的 Chrome 收藏夹：找回忘记放在哪里的资料、把某一主题的收藏内容整理成任务上下文、导出可审阅的整理报告、发现重复链接和混乱文件夹。多平台安装能力只是为了降低使用门槛，让你可以快速把这项收藏夹知识库能力装进自己正在使用的 AI 工具里。
 
 它优先复用本地缓存和精简索引，不会在每次搜索时把大量网页内容塞进对话，也不会默认修改你的 Chrome 收藏夹。用户入口是 npm/npx；包内部会使用一个很小的 Python 标准库脚本处理本地书签，但人类用户和 Agent 都不需要直接调用 Python 文件。
 
@@ -38,6 +38,14 @@
 ```text
 请把 bookmark-kb-skill 安装到当前项目的 Codex skill 目录。请执行：
 npm exec --yes --package github:RUDY-GAOJ/bookmark-kb-skill -- bookmark-kb-skill install --platforms=codex --scope=project --overwrite
+安装后，当我要求搜索、引用或整理 Chrome 收藏夹时，请使用 bookmark-kb-skill。
+```
+
+如果你同时使用 Codex、Claude、OpenClaw 和 Hermes，复制这一段：
+
+```text
+请把 bookmark-kb-skill 安装到当前项目的 Codex、Claude、OpenClaw 和 Hermes skill 目录。请执行：
+npm exec --yes --package github:RUDY-GAOJ/bookmark-kb-skill -- bookmark-kb-skill install --platforms=codex,claude,openclaw,hermes --scope=project --overwrite
 安装后，当我要求搜索、引用或整理 Chrome 收藏夹时，请使用 bookmark-kb-skill。
 ```
 
@@ -73,10 +81,10 @@ npm exec --yes --package github:RUDY-GAOJ/bookmark-kb-skill -- bookmark-kb-skill
 npm exec --yes --package github:RUDY-GAOJ/bookmark-kb-skill -- bookmark-kb-skill install --platforms=codex --scope=project --overwrite
 ```
 
-同时安装到 Codex 和 Claude：
+同时安装到 Codex、Claude、OpenClaw 和 Hermes：
 
 ```sh
-npm exec --yes --package github:RUDY-GAOJ/bookmark-kb-skill -- bookmark-kb-skill install --platforms=codex,claude --scope=project --overwrite
+npm exec --yes --package github:RUDY-GAOJ/bookmark-kb-skill -- bookmark-kb-skill install --platforms=codex,claude,openclaw,hermes --scope=project --overwrite
 ```
 
 ### npm 发布后安装
@@ -88,7 +96,7 @@ npx bookmark-kb-skill install --platforms=codex --scope=project --overwrite
 安装到多个平台：
 
 ```sh
-npx bookmark-kb-skill install --platforms=codex,claude --scope=project --overwrite
+npx bookmark-kb-skill install --platforms=codex,claude,openclaw,hermes --scope=project --overwrite
 ```
 
 全局安装到用户目录：
@@ -104,6 +112,8 @@ npx bookmark-kb-skill install --platforms=codex --scope=global --overwrite
 - `gemini`
 - `cursor`
 - `opencode`
+- `openclaw`
+- `hermes`
 
 ### 本地 CLI
 
@@ -151,10 +161,10 @@ bookmark-kb refresh --bookmarks-file "/path/to/Chrome/User Data/Default/Bookmark
 - 整理功能只导出报告，默认不执行移动、删除或合并操作。
 - 运行时缓存默认保存在 `~/.bookmark-kb`，可通过 `BOOKMARK_KB_HOME` 覆盖。
 
-## Star
+## Star 趋势
 
 <p align="center">
-  <a href="https://github.com/RUDY-GAOJ/bookmark-kb-skill/stargazers">
-    <img alt="GitHub stars" src="https://img.shields.io/github/stars/RUDY-GAOJ/bookmark-kb-skill?style=social" />
+  <a href="https://star-history.com/#RUDY-GAOJ/bookmark-kb-skill&Date">
+    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=RUDY-GAOJ/bookmark-kb-skill&type=Date" />
   </a>
 </p>

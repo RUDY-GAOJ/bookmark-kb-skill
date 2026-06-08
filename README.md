@@ -22,7 +22,7 @@ Turn messy Chrome bookmarks into a plug-and-play AI knowledge base.
 
 Still losing saved pages inside an overflowing bookmarks bar? Struggling to remember where you saved that one great resource? Want to clean up a huge bookmark collection, but have no idea where to begin? `bookmark-kb-skill` turns your Chrome bookmarks into local AI-ready context that agents can search, cite, and organize on demand.
 
-The skill installs into common AI tool skill directories, then lets agents use your saved links as a lightweight knowledge base: find forgotten resources, gather task-specific context, build source bundles, and review duplicate or messy bookmarks without crawling websites on every query.
+Its core job is not to manage skills. Its job is to make your saved links useful again: find forgotten resources, gather task-specific context, build source bundles, and review duplicate or messy bookmarks without crawling websites on every query. The installer simply makes that bookmark knowledge workflow easy to drop into the AI agent platforms you already use.
 
 The user-facing interface is npm/npx. The package keeps a small Python standard-library script internally for portable local bookmark processing, but humans and agents call `bookmark-kb-skill` or `bookmark-kb`.
 
@@ -44,6 +44,14 @@ npm exec --yes --package github:RUDY-GAOJ/bookmark-kb-skill -- bookmark-kb-skill
 Then use bookmark-kb-skill when I ask to search, use, or organize my Chrome bookmarks.
 ```
 
+For Codex + Claude + OpenClaw + Hermes:
+
+```text
+Install bookmark-kb-skill into this project for Codex, Claude, OpenClaw, and Hermes. Use:
+npm exec --yes --package github:RUDY-GAOJ/bookmark-kb-skill -- bookmark-kb-skill install --platforms=codex,claude,openclaw,hermes --scope=project --overwrite
+Then use bookmark-kb-skill when I ask to search, use, or organize my Chrome bookmarks.
+```
+
 ## Human Installation
 
 After npm publication:
@@ -55,7 +63,7 @@ npx bookmark-kb-skill install --platforms=codex --scope=project --overwrite
 Install into more than one platform:
 
 ```sh
-npx bookmark-kb-skill install --platforms=codex,claude --scope=project --overwrite
+npx bookmark-kb-skill install --platforms=codex,claude,openclaw,hermes --scope=project --overwrite
 ```
 
 Install from GitHub before npm publication:
@@ -77,6 +85,8 @@ Supported platform ids:
 - `gemini`
 - `cursor`
 - `opencode`
+- `openclaw`
+- `hermes`
 
 Project scope installs under the current directory. Global scope installs under the user profile where supported:
 
@@ -86,12 +96,12 @@ npx bookmark-kb-skill install --platforms=codex --scope=global --overwrite
 
 ## Features
 
-- Install the same Skill package into Codex, Claude, Gemini, Cursor, or OpenCode skill directories.
 - Read the default Chrome `Bookmarks` file, or use `--bookmarks-file` for another profile.
 - Cache normalized bookmark records locally under `~/.bookmark-kb`.
 - Search by title, URL, folder path, category, and tags without crawling websites on every query.
 - Export compact context bundles for later AI tasks.
 - Export organization reports without modifying Chrome bookmarks.
+- Install quickly into Codex, Claude, Gemini, Cursor, OpenCode, OpenClaw, or Hermes so the same bookmark knowledge workflow is available wherever you work.
 - Use Markdown output by default and JSON output with `--json`.
 
 ## Use Cases
@@ -201,11 +211,11 @@ npm publish
 
 The package is configured with `publishConfig.access=public`.
 
-## Stars
+## Star History
 
 <p align="center">
-  <a href="https://github.com/RUDY-GAOJ/bookmark-kb-skill/stargazers">
-    <img alt="GitHub stars" src="https://img.shields.io/github/stars/RUDY-GAOJ/bookmark-kb-skill?style=social" />
+  <a href="https://star-history.com/#RUDY-GAOJ/bookmark-kb-skill&Date">
+    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=RUDY-GAOJ/bookmark-kb-skill&type=Date" />
   </a>
 </p>
 

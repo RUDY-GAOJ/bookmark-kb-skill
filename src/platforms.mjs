@@ -9,6 +9,18 @@ export const PLATFORMS = [
     skillsDir: '.opencode/skills',
     globalSkillsDir: '.config/opencode/skills',
   },
+  {
+    id: 'openclaw',
+    name: 'OpenClaw',
+    skillsDir: '.openclaw/workspace/skills',
+    globalSkillsDir: '.openclaw/skills',
+  },
+  {
+    id: 'hermes',
+    name: 'Hermes Agent',
+    skillsDir: '.hermes/skills',
+    globalSkillsDir: '.hermes/skills',
+  },
 ];
 
 export function getPlatform(id) {

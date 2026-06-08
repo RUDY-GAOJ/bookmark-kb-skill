@@ -22,6 +22,18 @@ describe('platform registry', () => {
     assert.equal(resolveSkillsDir(platform, 'global'), '.config/opencode/skills');
   });
 
+  it('resolves OpenClaw workspace and global skills directories', () => {
+    const platform = getPlatform('openclaw');
+    assert.equal(resolveSkillsDir(platform, 'project'), '.openclaw/workspace/skills');
+    assert.equal(resolveSkillsDir(platform, 'global'), '.openclaw/skills');
+  });
+
+  it('resolves Hermes project and global skills directories', () => {
+    const platform = getPlatform('hermes');
+    assert.equal(resolveSkillsDir(platform, 'project'), '.hermes/skills');
+    assert.equal(resolveSkillsDir(platform, 'global'), '.hermes/skills');
+  });
+
   it('rejects unknown platform ids', () => {
     assert.throws(() => getPlatform('unknown-ai'), /Unknown platform/);
   });
@@ -154,7 +166,7 @@ describe('installer', () => {
     try {
       const result = spawnSync(
         process.execPath,
-        [bin, 'install', '--platforms=codex,claude', '--scope=project', '--overwrite'],
+      [bin, 'install', '--platforms=codex,claude,openclaw,hermes', '--scope=project', '--overwrite'],
         {
           cwd: temp,
           encoding: 'utf8',
@@ -166,12 +178,25 @@ describe('installer', () => {
       assert.deepEqual(payload, [
         { platform: 'codex', copied: 3, skipped: 0 },
         { platform: 'claude', copied: 3, skipped: 0 },
+        { platform: 'openclaw', copied: 3, skipped: 0 },
+        { platform: 'hermes', copied: 3, skipped: 0 },
       ]);
 
       const codexSkill = path.join(temp, '.codex', 'skills', 'bookmark-kb-skill', 'SKILL.md');
       const claudeSkill = path.join(temp, '.claude', 'skills', 'bookmark-kb-skill', 'SKILL.md');
+      const openclawSkill = path.join(
+        temp,
+        '.openclaw',
+        'workspace',
+        'skills',
+        'bookmark-kb-skill',
+        'SKILL.md'
+      );
+      const hermesSkill = path.join(temp, '.hermes', 'skills', 'bookmark-kb-skill', 'SKILL.md');
       assert.equal(typeof await readFile(codexSkill, 'utf8'), 'string');
       assert.equal(typeof await readFile(claudeSkill, 'utf8'), 'string');
+      assert.equal(typeof await readFile(openclawSkill, 'utf8'), 'string');
+      assert.equal(typeof await readFile(hermesSkill, 'utf8'), 'string');
     } finally {
       await rm(temp, { recursive: true, force: true });
     }

@@ -17,7 +17,7 @@ You are an AI coding agent. Update Bookmark KB Skill in the current project.
 4. Run the installer with `--overwrite` from the current project root:
 
 ```sh
-npm exec --yes --package github:RUDY-GAOJ/bookmark-kb-skill -- bookmark-kb-skill install --platforms=<platform-id-or-list> --scope=project --overwrite
+npm exec --yes --package github:RUDY-GAOJ/bookmark-kb-skill -- bookmark-kb-skill install --platforms=PLATFORM_IDS --scope=project --overwrite
 ```
 
 ## Verify

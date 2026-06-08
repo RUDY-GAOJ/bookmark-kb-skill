@@ -17,7 +17,7 @@ You are an AI coding agent. Install Bookmark KB Skill into the current project s
 4. Run the installer from the current project root:
 
 ```sh
-npm exec --yes --package github:RUDY-GAOJ/bookmark-kb-skill -- bookmark-kb-skill install --platforms=<platform-id> --scope=project --overwrite
+npm exec --yes --package github:RUDY-GAOJ/bookmark-kb-skill -- bookmark-kb-skill install --platforms=PLATFORM_ID --scope=project --overwrite
 ```
 
 Use a comma-separated list only if the user explicitly asks for multiple platforms:

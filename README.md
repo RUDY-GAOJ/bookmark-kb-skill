@@ -18,11 +18,13 @@
 
 # Bookmark KB Skill
 
-Turn Chrome bookmarks into a local, low-token knowledge base for AI agents.
+Turn messy Chrome bookmarks into a plug-and-play AI knowledge base.
 
-`bookmark-kb-skill` installs a platform-neutral Agent Skill into common AI tool skill directories, and provides an npm CLI for refreshing, searching, exporting context bundles, and generating organization reports.
+Still losing saved pages inside an overflowing bookmarks bar? Struggling to remember where you saved that one great resource? Want to clean up a huge bookmark collection, but have no idea where to begin? `bookmark-kb-skill` turns your Chrome bookmarks into local AI-ready context that agents can search, cite, and organize on demand.
 
-The user-facing interface is npm/npx. The package keeps a small Python standard-library script internally for portable local bookmark processing.
+The skill installs into common AI tool skill directories, then lets agents use your saved links as a lightweight knowledge base: find forgotten resources, gather task-specific context, build source bundles, and review duplicate or messy bookmarks without crawling websites on every query.
+
+The user-facing interface is npm/npx. The package keeps a small Python standard-library script internally for portable local bookmark processing, but humans and agents call `bookmark-kb-skill` or `bookmark-kb`.
 
 ## Agent Quick Install
 
@@ -91,6 +93,13 @@ npx bookmark-kb-skill install --platforms=codex --scope=global --overwrite
 - Export compact context bundles for later AI tasks.
 - Export organization reports without modifying Chrome bookmarks.
 - Use Markdown output by default and JSON output with `--json`.
+
+## Use Cases
+
+- Ask an agent to find a saved article, tool, or documentation page when you only remember the topic.
+- Turn a group of bookmarked links into a compact context bundle for writing, research, planning, or coding.
+- Review duplicate links and messy folders before doing a manual cleanup.
+- Keep bookmark search local and low-token instead of pasting full bookmark exports into every chat.
 
 ## Requirements
 

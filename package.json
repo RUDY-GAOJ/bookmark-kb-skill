@@ -3,6 +3,28 @@
   "version": "0.1.0",
   "description": "Install and run a platform-neutral bookmark knowledge base skill",
   "type": "module",
+  "license": "MIT",
+  "author": "RUDY-GAOJ",
+  "homepage": "https://github.com/RUDY-GAOJ/bookmark-kb-skill#readme",
+  "bugs": {
+    "url": "https://github.com/RUDY-GAOJ/bookmark-kb-skill/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RUDY-GAOJ/bookmark-kb-skill.git"
+  },
+  "keywords": [
+    "ai-skill",
+    "bookmarks",
+    "chrome",
+    "knowledge-base",
+    "npx",
+    "agent"
+  ],
+  "packageManager": "npm@10.8.2",
+  "publishConfig": {
+    "access": "public"
+  },
   "files": [
     "assets/manifest.json",
     "assets/skills/bookmark-kb-skill/SKILL.md",
@@ -18,7 +40,8 @@
     "bookmark-kb-install": "./bin/bookmark-kb-install.js"
   },
   "scripts": {
-    "test": "node --test test/install.test.mjs && python -m unittest discover -s test/python -p \"*_test.py\""
+    "test": "node --test test/install.test.mjs && python -m unittest discover -s test/python -p \"*_test.py\"",
+    "pack:check": "npm pack --dry-run"
   },
   "engines": {
     "node": ">=20"

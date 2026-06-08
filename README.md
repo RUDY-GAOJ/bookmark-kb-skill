@@ -28,23 +28,19 @@ The user-facing interface is npm/npx. The package keeps a small Python standard-
 
 ## Agent Quick Install
 
-Copy this into your AI coding agent. The agent should detect which platform it is running in and choose the matching platform id.
+Copy one line into your AI coding agent:
 
 ```text
-Install bookmark-kb-skill into this project.
-
-1. Detect your current AI agent platform.
-2. Choose the matching platform id from: codex, claude, gemini, cursor, opencode, openclaw, hermes.
-3. Run:
-   npm exec --yes --package github:RUDY-GAOJ/bookmark-kb-skill -- bookmark-kb-skill install --platforms=<platform-id> --scope=project --overwrite
-4. After installation, use bookmark-kb-skill whenever I ask to search, use as context, or organize my Chrome bookmarks.
+Install Bookmark KB Skill: https://raw.githubusercontent.com/RUDY-GAOJ/bookmark-kb-skill/main/docs/install.md
 ```
 
-If the user explicitly asks to install into multiple platforms, pass a comma-separated list:
+Already installed? Update with one line:
 
 ```text
-npm exec --yes --package github:RUDY-GAOJ/bookmark-kb-skill -- bookmark-kb-skill install --platforms=codex,claude,openclaw,hermes --scope=project --overwrite
+Update Bookmark KB Skill: https://raw.githubusercontent.com/RUDY-GAOJ/bookmark-kb-skill/main/docs/update.md
 ```
+
+The linked instruction lets the agent detect its current platform and run the correct npm command.
 
 ## Human Installation
 

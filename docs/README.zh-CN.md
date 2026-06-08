@@ -33,23 +33,19 @@
 
 ## 给 Agent
 
-复制下面这一段给你的 AI 编程 Agent。Agent 应该知道自己运行在哪个平台；它只需要从支持的平台 id 里选择匹配项，然后按命令格式安装。
+复制一行给你的 AI 编程 Agent：
 
 ```text
-请把 bookmark-kb-skill 安装到当前项目。
-
-1. 识别你当前所在的 AI Agent 平台。
-2. 从这些平台 id 里选择匹配项：codex, claude, gemini, cursor, opencode, openclaw, hermes。
-3. 执行：
-   npm exec --yes --package github:RUDY-GAOJ/bookmark-kb-skill -- bookmark-kb-skill install --platforms=<platform-id> --scope=project --overwrite
-4. 安装后，当我要求搜索、引用或整理 Chrome 收藏夹时，请使用 bookmark-kb-skill。
+帮我安装 Bookmark KB Skill：https://raw.githubusercontent.com/RUDY-GAOJ/bookmark-kb-skill/main/docs/install.md
 ```
 
-如果我明确要求你同时安装到多个平台，请把 platform id 用英文逗号连接，例如：
+已经装过了？更新也是一行：
 
 ```text
-npm exec --yes --package github:RUDY-GAOJ/bookmark-kb-skill -- bookmark-kb-skill install --platforms=codex,claude,openclaw,hermes --scope=project --overwrite
+帮我更新 Bookmark KB Skill：https://raw.githubusercontent.com/RUDY-GAOJ/bookmark-kb-skill/main/docs/update.md
 ```
+
+链接里的说明会让 Agent 自己识别当前平台，并执行正确的 npm 安装命令。
 
 安装后，你可以这样对 Agent 说：
 

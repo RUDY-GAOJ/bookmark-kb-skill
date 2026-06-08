@@ -215,6 +215,7 @@ describe('npm package metadata', () => {
       'assets/skills/bookmark-kb-skill/references',
       'assets/skills/bookmark-kb-skill/scripts/bookmark_kb.py',
       'bin',
+      'docs',
       'src',
       'README.md',
     ]);

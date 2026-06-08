@@ -1,3 +1,21 @@
+<p align="center">
+  <img src="docs/hero.svg" alt="Bookmark KB Skill - Chrome bookmarks to local AI context" width="100%" />
+</p>
+
+<p align="center">
+  <a href="docs/README.zh-CN.md">中文</a>
+  ·
+  <a href="#agent-quick-install">Agent Quick Install</a>
+  ·
+  <a href="#human-installation">Human Installation</a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/RUDY-GAOJ/bookmark-kb-skill/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/RUDY-GAOJ/bookmark-kb-skill/actions/workflows/ci.yml/badge.svg" /></a>
+  <a href="https://github.com/RUDY-GAOJ/bookmark-kb-skill/releases/tag/v0.1.0"><img alt="Release" src="https://img.shields.io/github/v/release/RUDY-GAOJ/bookmark-kb-skill?display_name=tag" /></a>
+  <a href="https://github.com/RUDY-GAOJ/bookmark-kb-skill/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/github/license/RUDY-GAOJ/bookmark-kb-skill" /></a>
+</p>
+
 # Bookmark KB Skill
 
 Turn Chrome bookmarks into a local, low-token knowledge base for AI agents.
@@ -6,25 +24,25 @@ Turn Chrome bookmarks into a local, low-token knowledge base for AI agents.
 
 The user-facing interface is npm/npx. The package keeps a small Python standard-library script internally for portable local bookmark processing.
 
-## Features
+## Agent Quick Install
 
-- Install the same Skill package into Codex, Claude, Gemini, Cursor, or OpenCode skill directories.
-- Read the default Chrome `Bookmarks` file, or use `--bookmarks-file` for another profile.
-- Cache normalized bookmark records locally under `~/.bookmark-kb`.
-- Search by title, URL, folder path, category, and tags without crawling websites on every query.
-- Export compact context bundles for later AI tasks.
-- Export organization reports without modifying Chrome bookmarks.
-- Use Markdown output by default and JSON output with `--json`.
+Copy this into your AI coding agent:
 
-## Requirements
+```text
+Install bookmark-kb-skill into this project for Codex. Use:
+npm exec --yes --package github:RUDY-GAOJ/bookmark-kb-skill -- bookmark-kb-skill install --platforms=codex --scope=project --overwrite
+Then refresh my Chrome bookmarks and search them when I ask bookmark-related questions.
+```
 
-- Node.js 20 or newer.
-- npm 10 or newer.
-- Python available as `python` on Windows or `python3` / `python` on macOS and Linux.
+For Codex + Claude:
 
-Set `BOOKMARK_KB_PYTHON` if Python is installed at a custom path.
+```text
+Install bookmark-kb-skill into this project for Codex and Claude. Use:
+npm exec --yes --package github:RUDY-GAOJ/bookmark-kb-skill -- bookmark-kb-skill install --platforms=codex,claude --scope=project --overwrite
+Then use bookmark-kb-skill when I ask to search, use, or organize my Chrome bookmarks.
+```
 
-## Install The Skill
+## Human Installation
 
 After npm publication:
 
@@ -41,7 +59,7 @@ npx bookmark-kb-skill install --platforms=codex,claude --scope=project --overwri
 Install from GitHub before npm publication:
 
 ```sh
-npm exec --package github:RUDY-GAOJ/bookmark-kb-skill -- bookmark-kb-skill install --platforms=codex --scope=project --overwrite
+npm exec --yes --package github:RUDY-GAOJ/bookmark-kb-skill -- bookmark-kb-skill install --platforms=codex --scope=project --overwrite
 ```
 
 Install from a local checkout:
@@ -63,6 +81,24 @@ Project scope installs under the current directory. Global scope installs under 
 ```sh
 npx bookmark-kb-skill install --platforms=codex --scope=global --overwrite
 ```
+
+## Features
+
+- Install the same Skill package into Codex, Claude, Gemini, Cursor, or OpenCode skill directories.
+- Read the default Chrome `Bookmarks` file, or use `--bookmarks-file` for another profile.
+- Cache normalized bookmark records locally under `~/.bookmark-kb`.
+- Search by title, URL, folder path, category, and tags without crawling websites on every query.
+- Export compact context bundles for later AI tasks.
+- Export organization reports without modifying Chrome bookmarks.
+- Use Markdown output by default and JSON output with `--json`.
+
+## Requirements
+
+- Node.js 20 or newer.
+- npm 10 or newer.
+- Python available as `python` on Windows or `python3` / `python` on macOS and Linux.
+
+Set `BOOKMARK_KB_PYTHON` if Python is installed at a custom path.
 
 ## Use The Bookmark CLI
 
@@ -155,6 +191,14 @@ npm publish
 ```
 
 The package is configured with `publishConfig.access=public`.
+
+## Stars
+
+<p align="center">
+  <a href="https://github.com/RUDY-GAOJ/bookmark-kb-skill/stargazers">
+    <img alt="GitHub stars" src="https://img.shields.io/github/stars/RUDY-GAOJ/bookmark-kb-skill?style=social" />
+  </a>
+</p>
 
 ## License
 
